@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="keywords" content="EEG, emotion detection, Roberts similarity, PSO, machine learning" />
+  <meta name="description" content="Register for our EEG-based emotion detection platform." />
+  <meta name="author" content="xAI" />
+
+  <title>Register | EEG-Based Emotion Detection</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #3182ce;
+      --primary-dark: #2b6cb0;
+      --secondary: #4a5568;
+      --light: #f5f7fa;
+      --white: #ffffff;
+      --accent: #6b46c1;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #e6f0fa 0%, #ffffff 100%);
+      font-family: 'Inter', sans-serif;
+      color: var(--secondary);
+      min-height: 100vh;
+    }
+    
+    .header_section {
+      background: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .header_section.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      padding: 0.5rem 0;
+    }
+    
+    .navbar-brand img {
+      transition: transform 0.3s ease;
+    }
+    
+    .navbar-brand img:hover {
+      transform: rotate(10deg);
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+      color: var(--secondary);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .nav-button {
+      background: var(--primary);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--white);
+      display: inline-block;
+    }
+    
+    .nav-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+    }
+    
+    .register-container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .register-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+      text-align: center;
+    }
+    
+    .register-subtitle {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--secondary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+    
+    .form-input::placeholder {
+      color: #a0aec0;
+    }
+    
+    .form-group {
+      position: relative;
+    }
+    
+    .form-group i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0aec0;
+    }
+    
+    .form-group.with-icon input {
+      padding-left: 2.8rem;
+    }
+    
+    .submit-btn {
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 0.8rem;
+      box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+    }
+    
+    .submit-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(49, 130, 206, 0.3);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 1.8rem;
+      color: #718096;
+    }
+    
+    .login-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+      color: var(--primary-dark);
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #a0aec0;
+    }
+    
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+      z-index: -1;
+    }
+    
+    .floating-element:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      background: var(--primary);
+      top: 10%;
+      left: 10%;
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    .floating-element:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      background: var(--accent);
+      bottom: 15%;
+      right: 10%;
+      animation: float 25s ease-in-out infinite 1s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+      33% { transform: translateY(-20px) translateX(15px) rotate(10deg); }
+      66% { transform: translateY(15px) translateX(-15px) rotate(-10deg); }
+    }
+    
+    @media (max-width: 768px) {
+      .register-container {
+        margin: 1.5rem;
+        padding: 2rem 1.5rem;
+      }
+      
+      .register-title {
+        font-size: 1.8rem;
+      }
+      
+      .register-subtitle {
+        font-size: 1rem;
+      }
+      
+      .floating-element {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating background elements -->
+  <div class="floating-element"></div>
+  <div class="floating-element"></div>
+  
+  <header class="header_section py-4">
+    <div class="container mx-auto px-4">
+      <nav class="flex justify-between items-center">
+        <a class="navbar-brand flex items-center gap-3" href="{{url_for('index')}}">
+          <img src="static/images/eeg-logo.jpg" height="40" width="40" alt="">
+          <span class="text-xl font-bold text-gray-800">Emotion Detection</span>
+        </a>
+        
+        <div class="hidden lg:flex items-center gap-6">
+          <a class="nav-link" href="{{url_for('index')}}">Home</a>
+          <a class="nav-button" href="{{url_for('register')}}">Register</a>
+          <a class="nav-button" href="{{url_for('login')}}">Login</a>
+        </div>
+        
+        <button class="lg:hidden text-gray-700 text-2xl" id="mobile-menu-button">
+          <i class="fas fa-bars"></i>
+        </button>
+      </nav>
+      
+      <!-- Mobile Menu -->
+      <div class="lg:hidden hidden py-4" id="mobile-menu">
+        <div class="flex flex-col gap-4">
+          <a class="nav-link" href="{{url_for('index')}}">Home</a>
+          <a class="nav-button inline-block text-center" href="{{url_for('register')}}">Register</a>
+          <a class="nav-button inline-block text-center" href="{{url_for('login')}}">Login</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8">
+    <div class="register-container">
+      <h1 class="register-title">Create Account</h1>
+      <p class="register-subtitle">Join our EEG emotion detection platform</p>
+      
+      <form action="{{url_for('register')}}" method="post">
+        <div class="form-group with-icon">
+          <i class="fas fa-user"></i>
+          <input class="form-input" type="text" name="name" placeholder="Full Name" required />
+        </div>
+        
+        <div class="form-group with-icon">
+          <i class="fas fa-envelope"></i>
+          <input class="form-input" type="email" name="email" placeholder="Email Address" required />
+        </div>
+        
+        <div class="form-group with-icon">
+          <i class="fas fa-lock"></i>
+          <input class="form-input" type="password" name="password" id="password" placeholder="Password" required />
+          <span class="password-toggle" id="password-toggle">
+            <i class="far fa-eye"></i>
+          </span>
+        </div>
+        
+        <div class="form-group with-icon">
+          <i class="fas fa-lock"></i>
+          <input class="form-input" type="password" name="c_password" id="c_password" placeholder="Confirm Password" required />
+          <span class="password-toggle" id="c-password-toggle">
+            <i class="far fa-eye"></i>
+          </span>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-user-plus mr-2"></i>Register Now
+        </button>
+      </form>
+      
+      <div class="login-link">
+        Already have an account? <a href="{{url_for('login')}}">Sign in here</a>
+      </div>
+    </div>
+  </main>
+
+  {% if message %}
+    <script>
+      // Create a more elegant notification system
+      document.addEventListener('DOMContentLoaded', function() {
+        const notification = document.createElement('div');
+        notification.innerHTML = `
+          <div class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-blue-500 max-w-sm animate-fadeIn">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-gray-700">${"{{ message }}"}</p>
+              </div>
+              <button class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500 notification-close">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Add close functionality
+        const closeButton = notification.querySelector('.notification-close');
+        closeButton.addEventListener('click', function() {
+          notification.style.animation = 'fadeOut 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        });
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            notification.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+          }
+        }, 5000);
+      });
+    </script>
+    
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(20px); }
+      }
+      
+      .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
+      }
+    </style>
+  {% endif %}
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+      
+      // Change icon
+      const icon = this.querySelector('i');
+      if (mobileMenu.classList.contains('hidden')) {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      } else {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      }
+    });
+
+    // Password visibility toggle
+    function setupPasswordToggle(toggleId, inputId) {
+      const toggle = document.getElementById(toggleId);
+      const input = document.getElementById(inputId);
+      
+      if (toggle && input) {
+        toggle.addEventListener('click', function() {
+          const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+          input.setAttribute('type', type);
+          
+          // Toggle eye icon
+          const icon = this.querySelector('i');
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
+        });
+      }
+    }
+    
+    setupPasswordToggle('password-toggle', 'password');
+    setupPasswordToggle('c-password-toggle', 'c_password');
+
+    // Form validation
+    const form = document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        const password = form.querySelector('input[name="password"]');
+        const confirmPassword = form.querySelector('input[name="c_password"]');
+        
+        if (password.value !== confirmPassword.value) {
+          e.preventDefault();
+          
+          // Show error message
+          const errorDiv = document.createElement('div');
+          errorDiv.innerHTML = `
+            <div class="mb-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700">
+              <p>Passwords do not match. Please try again.</p>
+            </div>
+          `;
+          
+          // Remove any existing error messages
+          const existingError = form.querySelector('.bg-red-100');
+          if (existingError) {
+            existingError.remove();
+          }
+          
+          form.insertBefore(errorDiv.firstChild, form.firstChild);
+          confirmPassword.focus();
+        }
+      });
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.header_section');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
+</html>

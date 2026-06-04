@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="keywords" content="EEG, emotion detection, Roberts similarity, PSO, machine learning" />
+  <meta name="description" content="Algorithm Performance for EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection" />
+  <meta name="author" content="xAI" />
+
+  <title>EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary: #4a5568;
+      --light: #f5f7fa;
+      --white: #ffffff;
+      --accent: #8b5cf6;
+      --gradient-start: #6366f1;
+      --gradient-end: #8b5cf6;
+    }
+    
+    body {
+      background: var(--light);
+      font-family: 'Inter', sans-serif;
+      color: var(--secondary);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    
+    .header_section {
+      background: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .header_section.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      padding: 0.5rem 0;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .navbar-brand img {
+      transition: transform 0.3s ease;
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+    }
+    
+    .navbar-brand img:hover {
+      transform: rotate(10deg);
+    }
+    
+    .brand-text {
+      font-weight: 700;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+      color: var(--secondary);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+    }
+    
+    .<nav-link:hover {
+      color: var(--primary);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .nav-link.active {
+      color: var(--primary);
+    }
+    
+    .nav-link.active::after {
+      width: 100%;
+    }
+    
+    .results-section {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .results-section::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234f46e5' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      animation: backgroundMove 30s linear infinite;
+      z-index: 0;
+    }
+    
+    @keyframes backgroundMove {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .results-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      padding: 4rem;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .results-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .results-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, #2d3748 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+    }
+    
+    .algorithm-section {
+      margin-bottom: 3rem;
+      background: rgba(255, 255,2 55, 0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .algorithm-section:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(79, 70, 229, 0.1);
+    }
+    
+    .algorithm-name {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .metric-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    
+    .metric-title {
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--secondary);
+    }
+    
+    .report-container {
+      background: rgba(0, 0, 0, 0.03);
+      padding: 1.5rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin-top: 1.5rem;
+    }
+    
+    .report-title {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    
+    .report-table th, .report-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .report-table th {
+      color: var(--accent);
+    }
+    
+    .report-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .chart-container {
+      margin-top: 2rem;
+      background: rgba(0, 0, 0, 0.03);
+      padding: 1.5rem;
+      border-radius: 10px;
+    }
+    
+    .chart-title {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .navbar-toggler {
+      border: none;
+      background: transparent;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      position: relative;
+      z-index: 1001;
+    }
+    
+    .navbar-toggler span {
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      margin: 2.5px 0;
+      transition: all 0.3s ease;
+      transform-origin: center;
+      border-radius: 3px;
+    }
+    
+    .navbar-toggler.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    
+    .navbar-toggler.active span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .navbar-toggler.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+    
+    .mobile-menu {
+      display: none;
+      width: 100%;
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 999;
+    }
+    
+    .mobile-menu.active {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .mobile-menu .nav-link {
+      padding: 0.75rem 1rem;
+      display: block;
+      text-align: center;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .mobile-menu .nav-link:hover {
+      background: rgba(79, 70, 229, 0.05);
+    }
+    
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.4;
+      z-index: 0;
+      filter: blur(1px);
+    }
+    
+    .floating-element:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      background: var(--gradient-start);
+      top: 15%;
+      left: 10%;
+      animation: float 15s ease-in-out infinite;
+    }
+    
+    .floating-element:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      background: var(--accent);
+      bottom: 20%;
+      right: 15%;
+      animation: float 18s ease-in-out infinite 1s;
+    }
+    
+    .floating-element:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      background: #6366f1;
+      top: 30%;
+      right: 20%;
+      animation: float 12s ease-in-out infinite 0.5s;
+    }
+    
+    .floating-element:nth-child(4) {
+      width: 50px;
+      height: 50px;
+      background: #8b5cf6;
+      bottom: 30%;
+      left: 20%;
+      animation: float 14s ease-in-out infinite 1.5s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+      33% { transform: translateY(-30px) translateX(20px) rotate(10deg) scale(1.05); }
+      66% { transform: translateY(20px) translateX(-20px) rotate(-10deg) scale(0.95); }
+    }
+    
+    @media (max-width: 1023px) {
+      .navbar-toggler {
+        display: flex;
+      }
+      
+      .desktop-menu {
+        display: none;
+      }
+      
+      .results-container {
+        padding: 3rem 1.5rem;
+      }
+      
+      .results-title {
+        font-size: 2.5rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .results-title {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .results-title {
+        font-size: 1.75rem;
+      }
+      
+      .algorithm-name {
+        font-size: 1.25rem;
+      }
+      
+      .report-container {
+        padding: 1rem;
+      }
+      
+      .results-container {
+        padding: 2rem 1rem;
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header_section py-4">
+    <div class="container mx-auto px-4">
+      <nav class="flex justify-between items-center">
+        <a class="navbar-brand" href="#">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDM1QzE1IDM1IDcuNSAzMi41IDcuNSAyMkM3LjUgMTEuNSAxNSAxNSAxNSAxNSIgc3Ryb2tlPSIjNGY0NmU1IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMjUgMzVDMjUgMzUgMzIuNSAzMi41IDMyLjUgMjJDMzIuNSAxMS41IDI1IDE1IDI1IDE1IiBzdHJva2U9IiM4YjVjZjYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik0xMCAxN0MxMCAxNyAxMi41IDkgMjAgOUMyNy41IDkgMzAgMTcgMzAgMTciIHN0cm9rZT0iIzZDMjhGOCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+" alt="">
+          <span class="brand-text">EmoDetect</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" id="mobile-menu-button" aria-label="Toggle navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <!-- Desktop Menu -->
+        <div class="desktop-menu hidden lg:block">
+          <ul class="flex items-center gap-6">
+            <li><a class="nav-link" href="{{url_for('home')}}">User Home</a></li>
+            <li><a class="nav-link active" href="{{url_for('algorithm')}}">Algorithm</a></li>
+            <li><a class="nav-link" href="{{url_for('prediction')}}">Detection</a></li>
+            <li><a class="nav-link" href="{{url_for('index')}}">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu -->
+      <div class="mobile-menu lg:hidden" id="mobile-menu">
+        <ul class="flex flex-col items-center gap-4">
+          <li><a class="nav-link" href="{{url_for('home')}}">User Home</a></li>
+          <li><a class="nav-link active" href="{{url_for('algorithm')}}">Algorithm</a></li>
+          <li><a class="nav-link" href="{{url_for('prediction')}}">Detection</a></li>
+          <li><a class="nav-link" href="{{url_for('index')}}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <section class="results-section">
+    <!-- Floating elements for visual interest -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    
+    <div class="results-container animate-on-scroll">
+      <h1 class="results-title">Algorithm Performance Results</h1>
+      
+      <!-- CNN with Roberts Similarity Results -->
+      <div class="algorithm-section animate-on-scroll">
+        <h2 class="algorithm-name">
+          <i class="fas fa-brain"></i>CNN with Roberts Similarity
+        </h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-bullseye"></i>Accuracy</h3>
+            <p class="metric-value">0.90</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-weight"></i>Precision (Avg)</h3>
+            <p class="metric-value">0.92</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-redo"></i>Recall (Avg)</h3>
+            <p class="metric-value">0.90</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-chart-line"></i>F1-Score (Avg)</h3>
+            <p class="metric-value">0.89</p>
+          </div>
+        </div>
+        
+        <div class="report-container">
+          <h3 class="report-title"><i class="fas fa-file-alt"></i>Classification Report</h3>
+          <table class="report-table">
+            <tr><th></th><th>precision</th><th>recall</th><th>f1-score</th><th>support</th></tr>
+            <tr><td>Class 0</td><td>0.78</td><td>1.00</td><td>0.87</td><td>142</td></tr>
+            <tr><td>Class 1</td><td>0.99</td><td>0.99</td><td>0.99</td><td>143</td></tr>
+            <tr><td>Class 2</td><td>0.99</td><td>0.70</td><td>0.82</td><td>142</td></tr>
+            <tr><td>accuracy</td><td colspan="3"></td><td>0.90</td></tr>
+            <tr><td>macro avg</td><td>0.92</td><td>0.90</td><td>0.89</td><td>427</td></tr>
+            <tr><td>weighted avg</td><td>0.92</td><td>0.90</td><td>0.89</td><td>427</td></tr>
+          </table>
+        </div>
+        
+        <div class="chart-container">
+          <h3 class="chart-title"><i class="fas fa-chart-bar"></i>Performance Metrics</h3>
+          <canvas id="cnnChart" height="250"></canvas>
+        </div>
+      </div>
+      
+      <!-- GNN Results -->
+      <div class="algorithm-section animate-on-scroll">
+        <h2 class="algorithm-name">
+          <i class="fas fa-project-diagram"></i>Graph Neural Network (GNN)
+        </h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-bullseye"></i>Accuracy</h3>
+            <p class="metric-value">0.90</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-weight"></i>Precision (Avg)</h3>
+            <p class="metric-value">0.91</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-redo"></i>Recall (Avg)</h3>
+            <p class="metric-value">0.90</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-chart-line"></i>F1-Score (Avg)</h3>
+            <p class="metric-value">0.90</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-trophy"></i>Best Validation Accuracy</h3>
+            <p class="metric-value">0.904</p>
+          </div>
+        </div>
+        
+        <div class="report-container">
+          <h3 class="report-title"><i class="fas fa-file-alt"></i>Classification Report</h3>
+          <table class="report-table">
+            <tr><th></th><th>precision</th><th>recall</th><th>f1-score</th><th>support</th></tr>
+            <tr><td>Class 0</td><td>0.83</td><td>1.00</td><td>0.91</td><td>143</td></tr>
+            <tr><td>Class 1</td><td>0.99</td><td>0.93</td><td>0.96</td><td>148</td></tr>
+            <tr><td>Class 2</td><td>0.91</td><td>0.77</td><td>0.84</td><td>136</td></tr>
+            <tr><td>accuracy</td><td colspan="3"></td><td>0.90</td></tr>
+            <tr><td>macro avg</td><td>0.91</td><td>0.90</td><td>0.90</td><td>427</td></tr>
+            <tr><td>weighted avg</td><td>0.91</td><td>0.90</td><td>0.90</td><td>427</td></tr>
+          </table>
+        </div>
+        
+        <div class="chart-container">
+          <h3 class="chart-title"><i class="fas fa-chart-bar"></i>Performance Metrics</h3>
+          <canvas id="gnnChart" height="250"></canvas>
+        </div>
+      </div>
+      
+      <!-- DeepConvNet Results -->
+      <div class="algorithm-section animate-on-scroll">
+        <h2 class="algorithm-name">
+          <i class="fas fa-layer-group"></i>DeepConvNet
+        </h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-bullseye"></i>Accuracy</h3>
+            <p class="metric-value">0.95</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-weight"></i>Precision (Avg)</h3>
+            <p class="metric-value">0.95</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-redo"></i>Recall (Avg)</h3>
+            <p class="metric-value">0.95</p>
+          </div>
+          <div class="metric-card">
+            <h3 class="metric-title"><i class="fas fa-chart-line"></i>F1-Score (Avg)</h3>
+            <p class="metric-value">0.95</p>
+          </div>
+        </div>
+        
+        <div class="report-container">
+          <h3 class="report-title"><i class="fas fa-file-alt"></i>Classification Report</h3>
+          <table class="report-table">
+            <tr><th></th><th>precision</th><th>recall</th><th>f1-score</th><th>support</th></tr>
+            <tr><td>Negative</td><td>0.94</td><td>0.94</td><td>0.94</td><td>143</td></tr>
+            <tr><td>Neutral</td><td>0.99</td><td>0.97</td><td>0.98</td><td>148</td></tr>
+            <tr><td>Positive</td><td>0.91</td><td>0.93</td><td>0.92</td><td>136</td></tr>
+            <tr><td>accuracy</td><td colspan="3"></td><td>0.95</td></tr>
+            <tr><td>macro avg</td><td>0.95</td><td>0.95</td><td>0.95</td><td>427</td></tr>
+            <tr><td>weighted avg</td><td>0.95</td><td>0.95</td><td>0.95</td><td>427</td></tr>
+          </table>
+        </div>
+        
+        <div class="chart-container">
+          <h3 class="chart-title"><i class="fas fa-chart-bar"></i>Performance Metrics</h3>
+          <canvas id="deepconvnetChart" height="250"></canvas>
+        </div>
+      </div>
+      
+      <!-- Comparison Chart -->
+      <div class="algorithm-section animate-on-scroll">
+        <h2 class="algorithm-name">
+          <i class="fas fa-chart-pie"></i>Algorithm Comparison
+        </h2>
+        <div class="chart-container">
+          <h3 class="chart-title"><i class="fas fa-chart-bar"></i>Accuracy Comparison</h3>
+          <canvas id="comparisonChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      this.classList.toggle('active');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('active');
+      
+      if (mobileMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuButton = document.getElementById('mobile-menu-button');
+      
+      if (mobileMenu.classList.contains('active') && 
+          !mobileMenu.contains(event.target) && 
+          !menuButton.contains(event.target)) {
+        mobileMenu.classList.remove('active');
+        menuButton.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.header_section');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // GSAP animations for scroll-triggered effects
+    gsap.registerPlugin(ScrollTrigger);
+    
+    gsap.utils.toArray(".animate-on-scroll").forEach((element, index) => {
+      gsap.from(element, {
+        scrollTrigger: {
+          trigger: element,
+          start: "top 85%",
+          toggleActions: "play none none none"
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: index * 0.1,
+        ease: "power2.out",
+      });
+    });
+
+    // Charts
+    document.addEventListener('DOMContentLoaded', function() {
+      // CNN Chart
+      const cnnCtx = document.getElementById('cnnChart').getContext('2d');
+      new Chart(cnnCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Class 0', 'Class 1', 'Class 2'],
+          datasets: [
+            {
+              label: 'Precision',
+              data: [0.78, 0.99, 0.99],
+              backgroundColor: 'rgba(79, 70, 229, 0.7)',
+              borderColor: 'rgba(79, 70, 229, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Recall',
+              data: [1.00, 0.99, 0.70],
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'F1-Score',
+              data: [0.87, 0.99, 0.82],
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1.0,
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            },
+            x: {
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#4a5568' } }
+          }
+        }
+      });
+
+      // GNN Chart
+      const gnnCtx = document.getElementById('gnnChart').getContext('2d');
+      new Chart(gnnCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Class 0', 'Class 1', 'Class 2'],
+          datasets: [
+            {
+              label: 'Precision',
+              data: [0.83, 0.99, 0.91],
+              backgroundColor: 'rgba(79, 70, 229, 0.7)',
+              borderColor: 'rgba(79, 70, 229, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Recall',
+              data: [1.00, 0.93, 0.77],
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'F1-Score',
+              data: [0.91, 0.96, 0.84],
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1.0,
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            },
+            x: {
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#4a5568' } }
+          }
+        }
+      });
+
+      // DeepConvNet Chart
+      const deepconvnetCtx = document.getElementById('deepconvnetChart').getContext('2d');
+      new Chart(deepconvnetCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Negative', 'Neutral', 'Positive'],
+          datasets: [
+            {
+              label: 'Precision',
+              data: [0.94, 0.99, 0.91],
+              backgroundColor: 'rgba(79, 70, 229, 0.7)',
+              borderColor: 'rgba(79, 70, 229, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Recall',
+              data: [0.94, 0.97, 0.93],
+              backgroundColor: 'rgba(139, 92, 246, 0.7)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'F1-Score',
+              data: [0.94, 0.98, 0.92],
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1.0,
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            },
+            x: {
+              ticks: { color: '#4a5568' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#4a5568' } }
+          }
+        }
+      });
+
+      // Comparison Chart
+      const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+      new Chart(comparisonCtx, {
+        type: 'radar',
+        data: {
+          labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+          datasets: [
+            {
+              label: 'CNN with Roberts',
+              data: [0.90, 0.92, 0.90, 0.89],
+              backgroundColor: 'rgba(79, 70, 229, 0.2)',
+              borderColor: 'rgba(79, 70, 229, 1)',
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(79, 70, 229, 1)'
+            },
+            {
+              label: 'GNN',
+              data: [0.90, 0.91, 0.90, 0.90],
+              backgroundColor: 'rgba(139, 92, 246, 0.2)',
+              borderColor: 'rgba(139, 92, 246, 1)',
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(139, 92, 246, 1)'
+            },
+            {
+              label: 'DeepConvNet',
+              data: [0.95, 0.95, 0.95, 0.95],
+              backgroundColor: 'rgba(99, 102, 241, 0.2)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(99, 102, 241, 1)'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' },
+              pointLabels: { color: '#4a5568' },
+              ticks: { color: '#4a5568', backdropColor: 'transparent' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#4a5568' } }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

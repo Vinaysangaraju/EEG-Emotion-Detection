@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="keywords" content="phishing detection, AI models, cybersecurity, machine learning, EEG, emotion detection" />
+  <meta name="description" content="Phishing URL Detection with EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection" />
+  <meta name="author" content="xAI" />
+
+  <title>EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary: #4a5568;
+      --light: #f5f7fa;
+      --white: #ffffff;
+      --accent: #8b5cf6;
+      --gradient-start: #6366f1;
+      --gradient-end: #8b5cf6;
+    }
+    
+    body {
+      background: var(--light);
+      font-family: 'Inter', sans-serif;
+      color: var(--secondary);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    
+    .header_section {
+      background: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .brand-text {
+      margin-left: 0.5rem;
+    }
+    
+    .nav-link {
+      color: var(--secondary);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s ease;
+      padding: 0.5rem 0;
+      position: relative;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary);
+    }
+    
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+    
+    .navbar-toggler {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    
+    .navbar-toggler span {
+      height: 3px;
+      width: 100%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-toggler.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    
+    .navbar-toggler.active span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .navbar-toggler.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -6px);
+    }
+    
+    .mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .mobile-menu.active {
+      max-height: 300px;
+    }
+    
+    .prediction-section {
+      min-height: 100vh;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .prediction-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 3rem;
+      position: relative;
+      z-index: 10;
+      transition: box-shadow 0.3s ease;
+    }
+    
+    .prediction-container:hover {
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+    
+    .prediction-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      text-align: center;
+    }
+    
+    .result-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .phishing-result {
+      background-color: rgba(255, 0, 0, 0.1);
+      color: #e53e3e;
+      border: 1px solid #fc8181;
+    }
+    
+    .safe-result {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    
+    .error-result {
+      background-color: rgba(255, 165, 0, 0.1);
+      color: #ed8936;
+      border: 1px solid #f6ad55;
+    }
+    
+    .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--secondary);
+      font-size: 1rem;
+      box-sizing: border-box;
+      height: 48px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    }
+    
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+    
+    .form-control.invalid {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+    }
+    
+    .error-text {
+      color: #e53e3e;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    
+    .submit-btn {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      color: var(--white);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+      box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+      height: 48px;
+    }
+    
+    .submit-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.4;
+      z-index: 1;
+      filter: blur(1px);
+      pointer-events: none;
+    }
+    
+    .floating-element:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      background: var(--gradient-start);
+      top: 15%;
+      left: 10%;
+    }
+    
+    .floating-element:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      background: var(--accent);
+      bottom: 20%;
+      right: 15%;
+    }
+    
+    .floating-element:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      background: #6366f1;
+      top: 30%;
+      right: 20%;
+    }
+    
+    .floating-element:nth-child(4) {
+      width: 50px;
+      height: 50px;
+      background: #8b5cf6;
+      bottom: 30%;
+      left: 20%;
+    }
+    
+    .form-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    
+    .form-section-title {
+      grid-column: 1 / -1;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(79, 70, 229, 0.1);
+    }
+    
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 1023px) {
+      .navbar-toggler {
+        display: flex;
+      }
+      
+      .desktop-menu {
+        display: none;
+      }
+      
+      .prediction-container {
+        padding: 2rem 1.5rem;
+      }
+      
+      .prediction-title {
+        font-size: 1.875rem;
+      }
+      
+      .form-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .prediction-title {
+        font-size: 1.65rem;
+      }
+      
+      .prediction-section {
+        padding: 3rem 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .prediction-container {
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+      }
+      
+      .prediction-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header_section py-4">
+    <div class="container mx-auto px-4">
+      <nav class="flex justify-between items-center">
+        <a class="navbar-brand" href="{{url_for('home')}}">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE1IDM1QzE1IDM1IDcuNSAzMi41IDcuNSAyMkM3LjUgMTEuNSAxNSAxNSAxNSAxNSIgc3Ryb2tlPSIjNGY0NmU1IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMjUgMzVDMjUgMzUgMzIuNSAzMi41IDMyLjUgMjJDMzIuNSAxMS41IDI1IDE1IDI1IDE1IiBzdHJva2U9IiM4YjVjZjYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxwYXRoIGQ9Ik0xMCAxN0MxMCAxNyAxMi41IDkgMjAgOUMyNy41IDkgMzAgMTcgMzAgMTciIHN0cm9rZT0iIzZDMjhGOCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+" alt="">
+          <span class="brand-text">EmoDetect</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" id="mobile-menu-button" aria-label="Toggle navigation">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <div class="desktop-menu hidden lg:block">
+          <ul class="flex items-center gap-6">
+            <li><a class="nav-link" href="{{url_for('home')}}">User Home</a></li>
+            <li><a class="nav-link" href="{{url_for('algorithm')}}">Algorithm</a></li>
+            <li><a class="nav-link active" href="{{url_for('prediction')}}">Prediction</a></li>
+            <li><a class="nav-link" href="{{url_for('index')}}">Logout</a></li>
+          </ul>
+        </div>
+      </nav>
+      
+      <div class="mobile-menu lg:hidden" id="mobile-menu">
+        <ul class="flex flex-col items-center gap-4 py-4">
+          <li><a class="nav-link" href="{{url_for('home')}}">User Home</a></li>
+          <li><a class="nav-link" href="{{url_for('algorithm')}}">Algorithm</a></li>
+          <li><a class="nav-link active" href="{{url_for('prediction')}}">Prediction</a></li>
+          <li><a class="nav-link" href="{{url_for('index')}}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <section class="prediction-section">
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    
+    <div class="prediction-container">
+      <h1 class="prediction-title">Emotion Detection</h1>
+      
+      {% if prediction %}
+      <div class="result-message {% if 'negative' in prediction|lower %}phishing-result{% elif 'positive' in prediction|lower %}safe-result{% else %}error-result{% endif %}">
+        {{ prediction }}
+      </div>
+      {% endif %}
+      
+      {% if error_message %}
+      <div class="result-message error-result">
+        {{ error_message }}
+      </div>
+      {% endif %}
+
+      <form id="prediction-form" action="{{ url_for('prediction') }}" method="post">
+        <div class="form-columns">
+          <h3 class="form-section-title">Entropy Features</h3>
+          
+          <div class="form-group">
+            <label class="form-label" for="entropy3_b">Entropy3_b</label>
+            <input type="number" step="any" class="form-control" id="entropy3_b" name="entropy3_b" required placeholder="Enter entropy3_b value">
+            <div class="error-text" id="entropy3_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="entropy0_a">Entropy0_a</label>
+            <input type="number" step="any" class="form-control" id="entropy0_a" name="entropy0_a" required placeholder="Enter entropy0_a value">
+            <div class="error-text" id="entropy0_a_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="entropy0_b">Entropy0_b</label>
+            <input type="number" step="any" class="form-control" id="entropy0_b" name="entropy0_b" required placeholder="Enter entropy0_b value">
+            <div class="error-text" id="entropy0_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="entropy3_a">Entropy3_a</label>
+            <input type="number" step="any" class="form-control" id="entropy3_a" name="entropy3_a" required placeholder="Enter entropy3_a value">
+            <div class="error-text" id="entropy3_a_error">Please enter a valid number</div>
+          </div>
+
+          <h3 class="form-section-title">Statistical Features</h3>
+
+          <div class="form-group">
+            <label class="form-label" for="min_q_7_b">Min_q_7_b</label>
+            <input type="number" step="any" class="form-control" id="min_q_7_b" name="min_q_7_b" required placeholder="Enter min_q_7_b value">
+            <div class="error-text" id="min_q_7_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mean_3_a">Mean_3_a</label>
+            <input type="number" step="any" class="form-control" id="mean_3_a" name="mean_3_a" required placeholder="Enter mean_3_a value">
+            <div class="error-text" id="mean_3_a_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mean_3_b">Mean_3_b</label>
+            <input type="number" step="any" class="form-control" id="mean_3_b" name="mean_3_b" required placeholder="Enter mean_3_b value">
+            <div class="error-text" id="mean_3_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mean_d_3_b2">Mean_d_3_b2</label>
+            <input type="number" step="any" class="form-control" id="mean_d_3_b2" name="mean_d_3_b2" required placeholder="Enter mean_d_3_b2 value">
+            <div class="error-text" id="mean_d_3_b2_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="max_q_8_b">Max_q_8_b</label>
+            <input type="number" step="any" class="form-control" id="max_q_8_b" name="max_q_8_b" required placeholder="Enter max_q_8_b value">
+            <div class="error-text" id="max_q_8_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="min_q_15_a">Min_q_15_a</label>
+            <input type="number" step="any" class="form-control" id="min_q_15_a" name="min_q_15_a" required placeholder="Enter min_q_15_a value">
+            <div class="error-text" id="min_q_15_a_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="mean_d_15_a">Mean_d_15_a</label>
+            <input type="number" step="any" class="form-control" id="mean_d_15_a" name="mean_d_15_a" required placeholder="Enter mean_d_15_a value">
+            <div class="error-text" id="mean_d_15_a_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="min_0_a">Min_0_a</label>
+            <input type="number" step="any" class="form-control" id="min_0_a" name="min_0_a" required placeholder="Enter min_0_a value">
+            <div class="error-text" id="min_0_a_error">Please enter a valid number</div>
+          </div>
+
+          <h3 class="form-section-title">FFT Features</h3>
+
+          <div class="form-group">
+            <label class="form-label" for="fft_91_b">Fft_91_b</label>
+            <input type="number" step="any" class="form-control" id="fft_91_b" name="fft_91_b" required placeholder="Enter fft_91_b value">
+            <div class="error-text" id="fft_91_b_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="min_q_12_a">Min_q_12_a</label>
+            <input type="number" step="any" class="form-control" id="min_q_12_a" name="min_q_12_a" required placeholder="Enter min_q_12_a value">
+            <div class="error-text" id="min_q_12_a_error">Please enter a valid number</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="min_q_5_a">Min_q_5_a</label>
+            <input type="number" step="any" class="form-control" id="min_q_5_a" name="min_q_5_a" required placeholder="Enter min_q_5_a value">
+            <div class="error-text" id="min_q_5_a_error">Please enter a valid number</div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-button">
+          <span class="loading-spinner" id="loading-spinner"></span>
+          <span id="button-text">Analyze The Values</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        this.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        
+        if (mobileMenu.classList.contains('active')) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = 'auto';
+        }
+      });
+
+      document.addEventListener('click', function(event) {
+        if (mobileMenu.classList.contains('active') && 
+            !mobileMenu.contains(event.target) && 
+            !mobileMenuButton.contains(event.target)) {
+          mobileMenu.classList.remove('active');
+          mobileMenuButton.classList.remove('active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.header_section');
+      if (header) {
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+    });
+
+    // Form validation
+    const predictionForm = document.getElementById('prediction-form');
+    if (predictionForm) {
+      predictionForm.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        const inputs = predictionForm.querySelectorAll('input[type="number"]');
+        
+        inputs.forEach(input => {
+          const errorElement = document.getElementById(`${input.id}_error`);
+          
+          if (!input.value || isNaN(input.value)) {
+            isValid = false;
+            input.classList.add('invalid');
+            if (errorElement) {
+              errorElement.style.display = 'block';
+            }
+          } else {
+            input.classList.remove('invalid');
+            if (errorElement) {
+              errorElement.style.display = 'none';
+            }
+          }
+        });
+        
+        if (!isValid) {
+          e.preventDefault();
+          const firstError = predictionForm.querySelector('.invalid');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else {
+          const submitButton = document.getElementById('submit-button');
+          const buttonText = document.getElementById('button-text');
+          const loadingSpinner = document.getElementById('loading-spinner');
+          
+          if (submitButton && buttonText && loadingSpinner) {
+            submitButton.disabled = true;
+            buttonText.textContent = 'Analyzing...';
+            loadingSpinner.style.display = 'inline-block';
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

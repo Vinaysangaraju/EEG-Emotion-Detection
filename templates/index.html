@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="keywords" content="EEG, emotion detection, Roberts similarity, PSO, machine learning" />
+  <meta name="description" content="Explore EEG-based emotion detection using Roberts Similarity and PSO Feature Selection with our advanced platform." />
+  <meta name="author" content="xAI" />
+
+  <title>EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #3182ce;
+      --primary-dark: #2b6cb0;
+      --secondary: #4a5568;
+      --light: #f5f7fa;
+      --white: #ffffff;
+      --accent: #6b46c1;
+    }
+    
+    body {
+      background: var(--light);
+      font-family: 'Inter', sans-serif;
+      color: var(--secondary);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    
+    .header_section {
+      background: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .header_section.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      padding: 0.5rem 0;
+    }
+    
+    .navbar-brand img {
+      transition: transform 0.3s ease;
+    }
+    
+    .navbar-brand img:hover {
+      transform: rotate(10deg);
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+      color: var(--secondary);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+    }
+    
+    .nav-link:hover {
+      color: var(--primary);
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .nav-button {
+      background: var(--primary);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--white);
+      display: inline-block;
+    }
+    
+    .nav-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+    }
+    
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e6f0fa 0%, #ffffff 100%);
+      position: relative;
+      padding: 2rem;
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233182ce' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      animation: backgroundMove 30s linear infinite;
+      z-index: 0;
+    }
+    
+    @keyframes backgroundMove {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .hero-content {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      padding: 3.5rem;
+      text-align: center;
+      max-width: 800px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hero-content:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .hero-content h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 1.5rem;
+      color: #2d3748;
+      background: linear-gradient(135deg, #2d3748 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-content p {
+      font-size: 1.2rem;
+      color: #718096;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .hero-button {
+      background: var(--primary);
+      padding: 0.9rem 2.2rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--white);
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+    }
+    
+    .hero-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(49, 130, 206, 0.35);
+    }
+    
+    .hero-button.secondary {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      box-shadow: none;
+    }
+    
+    .hero-button.secondary:hover {
+      background: rgba(49, 130, 206, 0.1);
+      color: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(49, 130, 206, 0.2);
+    }
+    
+    .floating-element {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.3;
+      z-index: 0;
+    }
+    
+    .floating-element:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      top: 15%;
+      left: 10%;
+      animation: float 15s ease-in-out infinite;
+    }
+    
+    .floating-element:nth-child(2) {
+      width: 60px;
+      height: 60px;
+      background: var(--accent);
+      bottom: 20%;
+      right: 15%;
+      animation: float 18s ease-in-out infinite 1s;
+    }
+    
+    .floating-element:nth-child(3) {
+      width: 40px;
+      height: 40px;
+      background: #48bb78;
+      top: 30%;
+      right: 20%;
+      animation: float 12s ease-in-out infinite 0.5s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+      33% { transform: translateY(-20px) translateX(15px) rotate(10deg); }
+      66% { transform: translateY(15px) translateX(-15px) rotate(-10deg); }
+    }
+    
+    .navbar-toggler {
+      border: none;
+      background: transparent;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+    }
+    
+    .navbar-toggler span {
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      margin: 2.5px 0;
+      transition: all 0.3s ease;
+      transform-origin: center;
+    }
+    
+    .navbar-toggler.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+    
+    .navbar-toggler.active span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .navbar-toggler.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+    
+    .mobile-menu {
+      display: none;
+      width: 100%;
+      background: var(--white);
+      padding: 1.5rem;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 999;
+    }
+    
+    .mobile-menu.active {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .mobile-menu ul {
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    
+    .mobile-menu .nav-link {
+      padding: 0.75rem 1rem;
+      display: block;
+      text-align: center;
+    }
+    
+    .mobile-menu .nav-button {
+      display: block;
+      text-align: center;
+      margin: 0.5rem 0;
+    }
+    
+    @media (max-width: 1023px) {
+      .navbar-toggler {
+        display: flex;
+      }
+      
+      .desktop-menu {
+        display: none;
+      }
+      
+      .hero-content h1 {
+        font-size: 2.2rem;
+      }
+      
+      .hero-content {
+        padding: 2.5rem 1.5rem;
+      }
+      
+      .hero-content p {
+        font-size: 1.1rem;
+      }
+      
+      .floating-element {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .hero-content h1 {
+        font-size: 1.8rem;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .hero-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header_section py-4">
+    <div class="container mx-auto px-4">
+      <nav class="flex justify-between items-center">
+        <a class="navbar-brand flex items-center gap-3" href="#">
+          <img src="static/images/eeg-logo.jpg" height="40" width="40" alt="">
+          <span class="text-xl font-bold text-gray-800">Emotion Detection</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" id="mobile-menu-button">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <!-- Desktop Menu -->
+        <div class="desktop-menu hidden lg:block">
+          <ul class="flex items-center gap-6">
+            <li>
+              <a class="nav-link" href="{{url_for('index')}}">Home</a>
+            </li>
+            <li>
+              <a class="nav-button" href="{{url_for('register')}}">Register</a>
+            </li>
+            <li>
+              <a class="nav-button" href="{{url_for('login')}}">Login</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu -->
+      <div class="mobile-menu lg:hidden" id="mobile-menu">
+        <ul class="flex flex-col items-center gap-4">
+          <li>
+            <a class="nav-link" href="{{url_for('index')}}">Home</a>
+          </li>
+          <li>
+            <a class="nav-button" href="{{url_for('register')}}">Register</a>
+          </li>
+          <li>
+            <a class="nav-button" href="{{url_for('login')}}">Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <!-- Floating elements for visual interest -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    
+    <div class="hero-content">
+      <h1 class="animate-on-scroll">EEG-Based Emotion Detection Using Roberts Similarity and PSO Feature Selection</h1>
+      <p class="animate-on-scroll" style="animation-delay: 0.1s;">
+        Discover advanced AI models for emotion detection using EEG signals with Roberts Similarity and PSO Feature Selection. Our cutting-edge platform combines neuroscience with machine learning for accurate emotional state recognition.
+      </p>
+      <div class="hero-buttons">
+        <a href="{{url_for('register')}}" class="hero-button animate-on-scroll" style="animation-delay: 0.2s;">
+          <i class="fas fa-rocket mr-2"></i>Get Started
+        </a>
+        <a href="{{url_for('login')}}" class="hero-button secondary animate-on-scroll" style="animation-delay: 0.3s;">
+          <i class="fas fa-sign-in-alt mr-2"></i>Login
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {% if message %}
+    <script>
+      // Create a more elegant notification system
+      document.addEventListener('DOMContentLoaded', function() {
+        const notification = document.createElement('div');
+        notification.innerHTML = `
+          <div class="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-blue-500 max-w-sm animate-fadeIn">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-gray-700">${"{{ message }}"}</p>
+              </div>
+              <button class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500 notification-close">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Add close functionality
+        const closeButton = notification.querySelector('.notification-close');
+        closeButton.addEventListener('click', function() {
+          gsap.to(notification, {
+            opacity: 0,
+            y: 20,
+            duration: 0.3,
+            onComplete: () => notification.remove()
+          });
+        });
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            gsap.to(notification, {
+              opacity: 0,
+              y: 20,
+              duration: 0.3,
+              onComplete: () => notification.remove()
+            });
+          }
+        }, 5000);
+      });
+    </script>
+  {% endif %}
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      this.classList.toggle('active');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuButton = document.getElementById('mobile-menu-button');
+      
+      if (mobileMenu.classList.contains('active') && 
+          !mobileMenu.contains(event.target) && 
+          !menuButton.contains(event.target)) {
+        mobileMenu.classList.remove('active');
+        menuButton.classList.remove('active');
+      }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const header = document.querySelector('.header_section');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // GSAP animations for scroll-triggered effects
+    gsap.registerPlugin(ScrollTrigger);
+    
+    gsap.utils.toArray(".animate-on-scroll").forEach((element, index) => {
+      gsap.from(element, {
+        scrollTrigger: {
+          trigger: element,
+          start: "top 85%",
+          toggleActions: "play none none none"
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: index * 0.1,
+        ease: "power2.out",
+      });
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          gsap.to(window, {
+            duration: 1,
+            scrollTo: {
+              y: targetElement,
+              offsetY: 80
+            },
+            ease: "power2.inOut"
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
