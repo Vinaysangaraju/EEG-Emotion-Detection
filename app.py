@@ -11,7 +11,7 @@ app = Flask(__name__)
 mydb = pymysql.connect(
     host="localhost",
     user="root",
-    password="vinay@201",
+    password="YOUR_SQL_PASSWORD",
     port=3306,
     database='phishing'
 )
